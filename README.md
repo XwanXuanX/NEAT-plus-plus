@@ -12,3 +12,15 @@ Start, stop, and restart container: `docker container <start:restart:stop> ubunt
 
 #### Open container shell
 Open container command-line: `docker exec -it ubuntu /bin/bash`
+
+## Build the project
+
+* `mkdir build`
+
+* `cd build`
+
+* `cmake ..` (make sure you've added CMake binary to your path!)
+
+* `make`
+
+* `./neat`
