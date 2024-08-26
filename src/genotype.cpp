@@ -56,10 +56,10 @@ void Genotype::dump() const{
 
 // this constructor creates a network with no hidden nodes
 // inputs and outputs forms a fully connected graph, each edge receives a weight of 1;
-explicit Genotype::Genotype(const int inputs, const int outputs){
+Genotype::Genotype(const int inputs, const int outputs){
         // get a new id number
         id = ++id_counter;
-        
+
         // create all the nodes
         using std::uint64_t;
         for(uint64_t i = 1; i <= inputs; ++i)
