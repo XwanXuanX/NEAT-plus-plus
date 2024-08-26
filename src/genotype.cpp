@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <format>
 #include <sstream>
+#include <iomanip>
 
 void Genotype::dumpfile(const std::string& file_name) const{
         // open the output file, is non, create one
