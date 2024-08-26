@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <sstream>
 #include <iomanip>
+#include <vector>
+#include <cassert>
 #include <limits>
 
 void Genotype::dumpfile(const std::string& file_name) const{
@@ -82,4 +84,69 @@ Genotype::Genotype(const int inputs, const int outputs){
                         });
                 }
         }
+
+        /**
+         * FIXME: After adding the graph representation of the network,
+         * FIXME: also construct the graph HERE!
+         */
+}
+
+// another way to construct a genotype is by reading from a .model file
+Genotype::Genotype(const std::filesystem::path& model_file){
+        using namespace std::filesystem;
+        // check if the given path is valid
+        if(!exists(model_file) || is_empty(model_file)){
+                throw std::invalid_argument(make_errmsg(__FILE__,__LINE__,"cannot open source .model file"));
+        }
+
+        // get the absolute path
+        path abs_path = absolute(model_file);
+        std::ifstream infile(abs_path.c_str());
+        if(!infile.is_open()){
+                throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"cannot open source .model file"));
+        }
+
+        // get a new id number
+        id = ++id_counter;
+
+        uint64_t size, in;
+        infile >> size; // read the number of nodes
+        std::vector<uint64_t> node_ids;
+        std::vector<char> node_types;
+        for(int i = 0; i < size; ++i)
+                infile >> in, node_ids.push_back(in);
+        for(int i = 0; i < size; ++i)
+                infile >> in, node_types.push_back(static_cast<char>(in));
+        assert(node_ids.size() == node_types.size() && node_ids.size() == size);
+
+        auto get_nodetype=[&](char c)->NodeType{
+                if(c == 'H') return NodeType::hidden;
+                else if(c == 'O') return NodeType::output;
+                return NodeType::sensor;
+        };
+
+        // now using node id and node type create the node gene list
+        for(int i = 0; i < size; ++i)
+                node_genes.push_back(Node{.node_number = node_ids.at(i), .node_type = get_nodetype(node_types.at(i))});
+        
+        infile >> size; // read the number of connections
+        uint64_t out, innov;
+        long double weight;
+        char enable;
+
+        for(int i = 0; i < size; ++i){
+                infile >> in >> out >> weight >> enable >> innov;
+                connection_genes.push_back(Connection{
+                        .in = in,
+                        .out = out,
+                        .weight = weight,
+                        .enable = enable == 'E' ? true : false,
+                        .innov = innov
+                });
+        }
+
+        /**
+         * FIXME: After adding the graph representation of the network,
+         * FIXME: also construct the graph HERE!
+         */
 }
