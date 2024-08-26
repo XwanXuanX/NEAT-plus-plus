@@ -1,5 +1,11 @@
 # NEAT++
 
+## General coding style guide
+
+1. Please, use 8 SPACE indentation
+
+2. Please, try to be consistent with other code in the codebase (including formatting and naming conventions and more!)
+
 ## Useful docker commands
 
 #### Build image and start container
