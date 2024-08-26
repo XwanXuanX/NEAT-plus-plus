@@ -3,6 +3,7 @@
 #include <list>
 #include <cstdint>
 #include <string>
+#include <filesystem>
 using std::uint64_t;
 
 // define three node types (hidden, input(sensor), output)
@@ -32,7 +33,9 @@ class Genotype{
         // this constructor creates a network with no hidden nodes
         // inputs and outputs forms a fully connected graph, each edge receives a weight of 1;
         explicit Genotype(const int inputs, const int outputs);
-
+        // another way to construct a genotype is by reading from a .model file
+        explicit Genotype(const std::filesystem::path& model_file);
+        
         // write the node genes and connection genes to a .model file
         void dump() const;
         void dump(const std::string& file_name) const;
