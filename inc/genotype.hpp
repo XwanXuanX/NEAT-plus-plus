@@ -17,6 +17,11 @@ enum struct NodeType{
 struct Node{
         uint64_t node_number;
         NodeType node_type;
+
+        // return the char representation of node type (when printing the node types)
+        static char get_nodetype(const NodeType type) noexcept;
+        // from the char representation to node type enum
+        static NodeType get_nodetype(const char type) noexcept;
 };
 
 // define connection genes
@@ -25,6 +30,9 @@ struct Connection{
         long double weight;
         bool enable;
         uint64_t innov;
+
+        // return the string representation of each connection (when printing connections)
+        static std::string make_connect(const Connection& connect);
 };
 
 // define genotype
@@ -54,4 +62,10 @@ class Genotype{
 
         // we would still need a graph representation of above nodes and edges
         // but more on this later...
+
+#define DEBUG
+#ifdef DEBUG // debug only methods - to enable, define the DEBUG flag
+        void print_node() const;
+        void print_connection() const;
+#endif
 };

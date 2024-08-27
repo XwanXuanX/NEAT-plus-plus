@@ -7,6 +7,28 @@
 #include <vector>
 #include <cassert>
 #include <limits>
+#include <iostream>
+
+char Node::get_nodetype(const NodeType type) noexcept{
+        if(type == NodeType::hidden) return 'H';
+        else if(type == NodeType::output) return 'O';
+        return 'S';
+}
+
+NodeType Node::get_nodetype(const char type) noexcept{
+        if(type == 'H') return NodeType::hidden;
+        else if(type == 'O') return NodeType::output;
+        return NodeType::sensor;
+}
+
+std::string Connection::make_connect(const Connection& connect){
+        std::ostringstream connection;
+        connection << connect.in << ' ' << connect.out << ' ';
+        connection << std::setprecision(std::numeric_limits<long double>::max_digits10) << connect.weight << ' ';
+        connection << (connect.enable ? 'E' : 'D') << ' ';
+        connection << connect.innov;
+        return connection.str();
+}
 
 void Genotype::dumpfile(const std::string& file_name) const{
         // open the output file, is non, create one
@@ -17,21 +39,6 @@ void Genotype::dumpfile(const std::string& file_name) const{
                 throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"cannot open target .model file"));
         }
 
-        auto get_nodetype=[&](const NodeType type)->char{
-                if(type == NodeType::hidden) return 'H';
-                else if(type == NodeType::output) return 'O';
-                return 'S';
-        };
-
-        auto make_connect=[&](const Connection& connect)->std::string{
-                std::ostringstream connection;
-                connection << connect.in << ' ' << connect.out << ' ';
-                connection << std::setprecision(std::numeric_limits<long double>::max_digits10) << connect.weight << ' ';
-                connection << (connect.enable ? 'E' : 'D') << ' ';
-                connection << connect.innov;
-                return connection.str();
-        };
-
         // write node genes
         // write node number
         outfile << std::to_string(node_genes.size()) << std::endl;
@@ -40,13 +47,13 @@ void Genotype::dumpfile(const std::string& file_name) const{
         outfile << std::endl;
         // write node type
         for(auto& node : node_genes)
-                outfile << get_nodetype(node.node_type) << ' ';
+                outfile << Node::get_nodetype(node.node_type) << ' ';
         outfile << std::endl;
 
         // write connection genes
         outfile << std::to_string(connection_genes.size()) << std::endl;
         for(auto& connect : connection_genes)
-                outfile << make_connect(connect) << std::endl;
+                outfile << Connection::make_connect(connect) << std::endl;
 }
 
 void Genotype::dump(const std::string& file_name) const{
@@ -109,28 +116,25 @@ Genotype::Genotype(const std::filesystem::path& model_file){
         // get a new id number
         id = ++id_counter;
 
-        uint64_t size, in;
+        char type;
+        uint64_t size, node_id;
         infile >> size; // read the number of nodes
         std::vector<uint64_t> node_ids;
         std::vector<char> node_types;
         for(int i = 0; i < size; ++i)
-                infile >> in, node_ids.push_back(in);
+                infile >> node_id, node_ids.push_back(node_id);
         for(int i = 0; i < size; ++i)
-                infile >> in, node_types.push_back(static_cast<char>(in));
-        assert(node_ids.size() == node_types.size() && node_ids.size() == size);
-
-        auto get_nodetype=[&](char c)->NodeType{
-                if(c == 'H') return NodeType::hidden;
-                else if(c == 'O') return NodeType::output;
-                return NodeType::sensor;
-        };
-
+                infile >> type, node_types.push_back(type);
         // now using node id and node type create the node gene list
-        for(int i = 0; i < size; ++i)
-                node_genes.push_back(Node{.node_number = node_ids.at(i), .node_type = get_nodetype(node_types.at(i))});
-        
+        for(int i = 0; i < size; ++i){
+                node_genes.push_back(Node{
+                        .node_number = node_ids.at(i),
+                        .node_type = Node::get_nodetype(node_types.at(i))
+                });
+        }
+
         infile >> size; // read the number of connections
-        uint64_t out, innov;
+        uint64_t in, out, innov;
         long double weight;
         char enable;
 
@@ -150,3 +154,23 @@ Genotype::Genotype(const std::filesystem::path& model_file){
          * FIXME: also construct the graph HERE!
          */
 }
+
+#ifdef DEBUG
+// print the node genes for display
+void Genotype::print_node() const{
+        std::cout << node_genes.size() << std::endl;
+        for(auto& node : node_genes)
+                std::cout << node.node_number << ' ';
+        std::cout << std::endl;
+        for(auto& node : node_genes)
+                std::cout << Node::get_nodetype(node.node_type) << ' ';
+        std::cout << std::endl;
+}
+
+// print the connection genes for display
+void Genotype::print_connection() const{
+        std::cout << connection_genes.size() << std::endl;
+        for(auto& connection : connection_genes)
+                std::cout << Connection::make_connect(connection) << std::endl;
+}
+#endif
