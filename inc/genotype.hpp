@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 #include <filesystem>
+
+// using declarations
 using std::uint64_t;
 
 // define three node types (hidden, input(sensor), output)
@@ -44,15 +46,8 @@ class Genotype{
         // another way to construct a genotype is by reading from a .model file
         explicit Genotype(const std::filesystem::path& model_file);
         
-        // write the node genes and connection genes to a .model file
-        void dump() const;
-        void dump(const std::string& file_name) const;
-
-        // graph representation of above nodes and edges
-        void generate_image() const;
-
     private:
-        void dumpfile(const std::string& file_name) const;
+        friend struct GenotypeProbing; // linking printing utils
 
         // we would prefer using a linked list to store all the node genes and connection genes
         // linked list support O(1) operations (compared to using vector)
@@ -62,13 +57,4 @@ class Genotype{
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;
         uint64_t id;
-
-        // helper method to generate the dot file to generate image
-        void generate_dot(const std::filesystem::path& model_file) const;
-
-#define DEBUG
-#ifdef DEBUG // debug only methods - to enable, define the DEBUG flag
-        void print_node() const;
-        void print_connection() const;
-#endif
 };
