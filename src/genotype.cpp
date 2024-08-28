@@ -1,5 +1,6 @@
 #include "genotype.hpp"
 #include "utility.hpp"
+#include "prob.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
