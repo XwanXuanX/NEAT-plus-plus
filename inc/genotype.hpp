@@ -48,6 +48,9 @@ class Genotype{
         void dump() const;
         void dump(const std::string& file_name) const;
 
+        // graph representation of above nodes and edges
+        void generate_image() const;
+
     private:
         void dumpfile(const std::string& file_name) const;
 
@@ -60,8 +63,8 @@ class Genotype{
         inline static uint64_t id_counter = 0;
         uint64_t id;
 
-        // we would still need a graph representation of above nodes and edges
-        // but more on this later...
+        // helper method to generate the dot file to generate image
+        void generate_dot(const std::filesystem::path& model_file) const;
 
 #define DEBUG
 #ifdef DEBUG // debug only methods - to enable, define the DEBUG flag
