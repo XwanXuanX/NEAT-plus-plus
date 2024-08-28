@@ -9,6 +9,7 @@ ENV HOME /root
 # Extract the archive and add Clang to the PATH
 RUN apt-get update && apt-get install -y \
   cmake \
+  graphviz \
   build-essential
 
 # Copy local files to container
