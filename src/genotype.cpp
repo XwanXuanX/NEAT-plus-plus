@@ -81,15 +81,9 @@ void Genotype::generate_dot(const std::filesystem::path& model_file) const {
         for (auto& node : node_genes) {
                 std::string color;
                 switch (node.node_type) {
-                case NodeType::sensor:
-                        color = "green2";
-                        break;
-                case NodeType::hidden:
-                        color = "grey";
-                        break;
-                case NodeType::output:
-                        color = "pink";
-                        break;
+                        case NodeType::sensor: color = "green2"; break;
+                        case NodeType::hidden: color = "grey"; break;
+                        case NodeType::output: color = "pink"; break;
                 }
                 dotfile << "    " << node.node_number << " [label=\"" << node.node_number 
                         << " (" << Node::get_nodetype(node.node_type) << ")\", fillcolor=" << color << "];\n";
