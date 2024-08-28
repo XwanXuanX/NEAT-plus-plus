@@ -4,6 +4,12 @@
 
 // this class is a collection of static methods that print/display the genotype information
 // when you want to call one of it's method, simply provide with a genotype instance
+// to use GenotypeProbing utils in Genotype methods, simply write:
+// {
+//      ...
+//      GenotypeProbing::print_node(*this);
+//      ...
+// }
 struct GenotypeProbing{
     public:
         // write the node genes and connection genes to a .model file
