@@ -1,5 +1,6 @@
 #include "genotype.hpp"
 #include "utility.hpp"
+#include "prob.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
@@ -28,100 +29,6 @@ std::string Connection::make_connect(const Connection& connect){
         connection << (connect.enable ? 'E' : 'D') << ' ';
         connection << connect.innov;
         return connection.str();
-}
-
-void Genotype::dumpfile(const std::string& file_name) const{
-        // open the output file, if non, create one
-        std::ostringstream full_file_name;
-        full_file_name << file_name << ".model";
-        std::ofstream outfile(full_file_name.str());
-        if(!outfile.is_open()){
-                throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"cannot open target .model file"));
-        }
-
-        // write node genes
-        // write node number
-        outfile << std::to_string(node_genes.size()) << std::endl;
-        for(auto& node : node_genes)
-                outfile << std::to_string(node.node_number) << ' ';
-        outfile << std::endl;
-        // write node type
-        for(auto& node : node_genes)
-                outfile << Node::get_nodetype(node.node_type) << ' ';
-        outfile << std::endl;
-
-        // write connection genes
-        outfile << std::to_string(connection_genes.size()) << std::endl;
-        for(auto& connect : connection_genes)
-                outfile << Connection::make_connect(connect) << std::endl;
-}
-
-void Genotype::dump(const std::string& file_name) const{
-        dumpfile(file_name);
-}
-
-void Genotype::dump() const{
-        dumpfile(std::to_string(id));
-}
-
-void Genotype::generate_dot(const std::filesystem::path& model_file) const {
-        // open the dot file, if non, create one
-        std::ofstream dotfile(model_file);
-        if (!dotfile.is_open()) {
-                throw std::runtime_error(make_errmsg(__FILE__, __LINE__, "cannot open target .dot file"));
-        }
-
-        // dot file opening line and style settings
-        dotfile << "digraph G {\n";
-        dotfile << "    node [shape=circle, style=filled, fontname=\"Helvetica\", fontsize=12];\n";
-        dotfile << "    edge [fontname=\"Helvetica\", fontsize=10];\n";
-        
-        // generate node genes
-        // generate nodes number and type
-        for (auto& node : node_genes) {
-                std::string color;
-                switch (node.node_type) {
-                        case NodeType::sensor: color = "green2"; break;
-                        case NodeType::hidden: color = "grey"; break;
-                        case NodeType::output: color = "pink"; break;
-                }
-                dotfile << "    " << node.node_number << " [label=\"" << node.node_number 
-                        << " (" << Node::get_nodetype(node.node_type) << ")\", fillcolor=" << color << "];\n";
-        }
-        
-        // generate connection genes
-        for (auto& connect : connection_genes) {
-                dotfile << "    " << connect.in << " -> " << connect.out 
-                        << " [label=\"Weight: " << connect.weight 
-                        << "\", color=" << (connect.enable ? "blue" : "red") << "];\n";
-        }
-        
-        dotfile << "}\n";
-}
-
-void Genotype::generate_image() const {
-        // construct the DOT file name
-        std::ostringstream dot_file_path;
-        dot_file_path << std::to_string(id) << ".dot";
-
-        // generate the dot file first
-        generate_dot(dot_file_path.str());
-        
-        // construct the PNG file name
-        std::ostringstream png_file_path;
-        png_file_path << std::to_string(id) << ".png";
-        
-        // create the command to convert DOT to PNG using Graphviz's dot tool
-        std::ostringstream command;
-        command << "dot -Tpng -o " << png_file_path.str() << " " << dot_file_path.str();
-        
-        // execute the command
-        int result = std::system(command.str().c_str());
-        
-        //check if the command was successful
-        if (result != 0) {
-                throw std::runtime_error(make_errmsg(__FILE__, __LINE__, "cannot generate image from DOT file"));
-        }
 }
 
 // this constructor creates a network with no hidden nodes
@@ -214,23 +121,3 @@ Genotype::Genotype(const std::filesystem::path& model_file){
          * FIXME: also construct the graph HERE!
          */
 }
-
-#ifdef DEBUG
-// print the node genes for display
-void Genotype::print_node() const{
-        std::cout << node_genes.size() << std::endl;
-        for(auto& node : node_genes)
-                std::cout << node.node_number << ' ';
-        std::cout << std::endl;
-        for(auto& node : node_genes)
-                std::cout << Node::get_nodetype(node.node_type) << ' ';
-        std::cout << std::endl;
-}
-
-// print the connection genes for display
-void Genotype::print_connection() const{
-        std::cout << connection_genes.size() << std::endl;
-        for(auto& connection : connection_genes)
-                std::cout << Connection::make_connect(connection) << std::endl;
-}
-#endif
