@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <list>
 #include <cstdint>
 #include <string>
@@ -45,6 +46,9 @@ class Genotype{
         explicit Genotype(const int inputs, const int outputs);
         // another way to construct a genotype is by reading from a .model file
         explicit Genotype(const std::filesystem::path& model_file);
+
+        // reset the evaluation states (clear the node values)
+        inline void reset_state() { eval_state.clear(); }
         
     private:
         friend struct GenotypeProbing; // linking printing utils
@@ -53,6 +57,10 @@ class Genotype{
         // linked list support O(1) operations (compared to using vector)
         std::list<Node> node_genes;
         std::list<Connection> connection_genes;
+
+        // we need to keep track of the network state during evaluation, so that new values can be
+        // updated properly using old values
+        std::map<uint64_t, long double> eval_state;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

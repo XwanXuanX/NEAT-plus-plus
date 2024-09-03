@@ -63,6 +63,9 @@ Genotype::Genotype(const int inputs, const int outputs){
          * FIXME: After adding the graph representation of the network,
          * FIXME: also construct the graph HERE!
          */
+
+        // clear the evaluation states
+        reset_state();
 }
 
 // another way to construct a genotype is by reading from a .model file
@@ -120,4 +123,7 @@ Genotype::Genotype(const std::filesystem::path& model_file){
          * FIXME: After adding the graph representation of the network,
          * FIXME: also construct the graph HERE!
          */
+
+        // reset the evaluation states
+        reset_state();
 }
