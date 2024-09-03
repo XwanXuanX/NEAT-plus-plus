@@ -127,3 +127,13 @@ Genotype::Genotype(const std::filesystem::path& model_file){
         // reset the evaluation states
         reset_state();
 }
+
+// using the input data, propogate the network and compute for the output
+Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
+        /**
+         * FIXME: FILL ME UP PLS!
+         * FIXME: return a dummy value for now...
+         */
+
+        return {};
+}
