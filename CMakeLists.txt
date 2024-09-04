@@ -27,4 +27,4 @@ add_subdirectory(inc)
 
 # Repo structure
 include_directories(inc)
-add_executable(neat ${main_src} ${genotype_src} ${utility_src} ${prob_src})
+add_executable(neat ${main_src} ${genotype_src} ${utility_src} ${prob_src} ${xor_src})
