@@ -15,3 +15,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: compilation
       run: mkdir build && cd build && cmake .. && make
+    - name: valgrind check
+      run: apt-get install valgrind && valgrind
