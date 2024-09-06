@@ -121,3 +121,13 @@ Genotype::Genotype(const std::filesystem::path& model_file){
          * FIXME: also construct the graph HERE!
          */
 }
+
+// using the input data, propogate the network and compute for the output
+Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
+        /**
+         * FIXME: FILL ME UP PLS!
+         * FIXME: return a dummy value for now...
+         */
+
+        return {};
+}
