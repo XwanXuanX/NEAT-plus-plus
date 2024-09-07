@@ -1,6 +1,7 @@
 #include "xor-game.hpp"
 #include "utility.hpp"
 #include <stdexcept>
+#include <cassert>
 
 // specify the number of input pins to the XOR gate
 XorGame::XorGame(const std::uint32_t in_pin) : in_pin{in_pin}{
@@ -25,12 +26,18 @@ XorGame::DataPkt XorGame::collect() const{
         return pkt;
 }
 
-
-
-
 // check if the produced output matches the expected output, and end the game
 bool XorGame::acturate(const DataPkt& pkt){
-
+        assert(pkt.size() == 1); // only one output is allowed
+        // produce the expected output
+        assert(rand_input.at(1) == 1 || rand_input.at(1) == 0);
+        bool expected = static_cast<bool>(rand_input.at(1));
+        for(int i = 2; i <= in_pin; ++i){
+                assert(rand_input.at(i) == 1 || rand_input.at(i) == 0);
+                expected ^= static_cast<bool>(rand_input.at(i));
+        }
+        // check correctness and continue the game
+        return expected == pkt.begin()->second;
 }
 
 // increase the score if the output is correct
