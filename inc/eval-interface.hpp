@@ -5,7 +5,6 @@
 #include "genotype.hpp"
 
 using std::uint64_t;
-using std::int64_t;
 
 /**
  * This file only defines the evaluation framework, which is the interface class
@@ -39,16 +38,26 @@ class EvalInterface{
          *   ` update the genotype's score using the user-defined score update policy
          */
         inline void loop(Genotype& geno){
-                bool the_end = false;
+                // initialize the genotype and the necessary game variables
+                initialize(geno);
+
+                bool cont = true;
                 do{
                         // check if the game has end or not
-                        the_end = !acturate(geno.evaluate(collect()));
-                        // update the geno's score
-                        geno.set_score(upd_score(geno.get_score()));
-                }while(!the_end);
+                        cont = acturate(geno.evaluate(collect()));
+                        // update the geno's score (fitness)
+                        geno.fitness = upd_score(geno.fitness);
+                }while(cont);
         }
 
     private:
+        /**
+         * genotype and game initialization:
+         *  - initialize the needed entries
+         *  - must implement in derived classes
+         */
+        virtual void initialize(Genotype& geno) = 0;
+
         /**
          * data collection:
          * - collect necessary data to feed into the network from the outside world (game, etc.)
@@ -72,5 +81,5 @@ class EvalInterface{
          * - calculate the new score based on the previous score
          * - must implement in derived class (your own score update policy)
          */
-        virtual int64_t upd_score(const int64_t old_score) const = 0;
+        virtual long double upd_score(const long double old_score) const = 0;
 };

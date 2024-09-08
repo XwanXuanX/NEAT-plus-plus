@@ -129,5 +129,5 @@ Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
          * FIXME: return a dummy value for now...
          */
 
-        return {};
+        return {{1,1}}; // hard-coded for the purpose of testing XorGame class
 }

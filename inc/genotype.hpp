@@ -41,7 +41,7 @@ struct Connection{
 
 // define genotype
 class Genotype{
-    public:
+    public: // public member functions
         using DataPkt = std::map<uint64_t, long double>;
 
         // this constructor creates a network with no hidden nodes
@@ -53,9 +53,9 @@ class Genotype{
         // using the input data, propogate the network and compute for the output
         DataPkt evaluate(const DataPkt& pkt);
 
-        // getters and setters for a genotype's score
-        inline int64_t get_score() const { return score; }
-        inline void set_score(const int64_t new_score) { score = new_score; }
+    public: // public member variables
+        // the score (fitness level) of a genotype
+        long double fitness;
 
     private:
         friend struct GenotypeProbing; // linking printing utils
@@ -64,9 +64,6 @@ class Genotype{
         // linked list support O(1) operations (compared to using vector)
         std::list<Node> node_genes;
         std::list<Connection> connection_genes;
-
-        // the score (fitness level) of a genotype
-        int64_t score;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;
