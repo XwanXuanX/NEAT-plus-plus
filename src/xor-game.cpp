@@ -9,6 +9,11 @@ XorGame::XorGame(const std::uint32_t in_pin) : in_pin{in_pin}{
                 throw std::invalid_argument(make_errmsg(__FILE__,__LINE__,"pin # must be at least 2"));
 }
 
+// initialize the genotype's fitness to 0
+void XorGame::initialize(Genotype& geno){
+        geno.fitness = 0;
+}
+
 // generate random bits as inputs to the xor gate
 XorGame::DataPkt XorGame::collect() const{
         // assuming node 1~in_pin is used for inputs
@@ -41,6 +46,6 @@ bool XorGame::acturate(const DataPkt& pkt){
 }
 
 // increase the score if the output is correct
-int64_t XorGame::upd_score(const int64_t old_score) const{
-
+long double XorGame::upd_score(const long double old_score) const{
+        return old_score + 1;
 }
