@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <list>
 #include <cstdint>
 #include <string>
@@ -7,6 +8,7 @@
 
 // using declarations
 using std::uint64_t;
+using std::int64_t;
 
 // define three node types (hidden, input(sensor), output)
 enum struct NodeType{
@@ -39,13 +41,22 @@ struct Connection{
 
 // define genotype
 class Genotype{
-    public:
+    public: // public member functions
+        using DataPkt = std::map<uint64_t, long double>;
+
         // this constructor creates a network with no hidden nodes
         // inputs and outputs forms a fully connected graph, each edge receives a weight of 1;
         explicit Genotype(const int inputs, const int outputs);
         // another way to construct a genotype is by reading from a .model file
         explicit Genotype(const std::filesystem::path& model_file);
-        
+
+        // using the input data, propogate the network and compute for the output
+        DataPkt evaluate(const DataPkt& pkt);
+
+    public: // public member variables
+        // the score (fitness level) of a genotype
+        long double fitness;
+
     private:
         friend struct GenotypeProbing; // linking printing utils
 
