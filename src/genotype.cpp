@@ -166,7 +166,8 @@ auto Genotype::top_sort() const -> std::vector<uint64_t>{
         std::vector<uint64_t> indeg(node_genes.size() + 1, 0); // node id start from 1
         // calculate the in degree of each vertex
         for(auto& connection : connection_genes)
-                indeg[connection.out]++;
+                if(connection.enable)
+                        indeg[connection.out]++;
         
         // obtain all the nodes with in degree 0
         std::deque<uint64_t> q;
