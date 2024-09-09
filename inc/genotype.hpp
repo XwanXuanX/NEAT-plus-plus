@@ -1,12 +1,12 @@
 #pragma once
 
+#include <set>
 #include <map>
 #include <list>
 #include <string>
 #include <cstdint>
 #include <utility>
 #include <filesystem>
-#include <set>
 
 // using declarations
 using std::uint64_t;
@@ -75,8 +75,6 @@ class Genotype{
 
         // adjacency list strcture of the network
         WeightedGraph graph;
-
-        // transpose of graph
         UnweightedGraph transpose_graph;
 
         // helper method to construct graph based on connection list
