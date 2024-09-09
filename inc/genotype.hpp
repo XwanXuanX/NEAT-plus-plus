@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <map>
 #include <set>
 #include <list>
@@ -48,7 +49,8 @@ class Genotype{
         using DataPkt = std::map<uint64_t, long double>;
         // map is a set of pairs itself; easier to write, have move functionalities,
         // and two level indexing makes updating an edge weight O(2logN)
-        using Graph = std::map<uint64_t, std::map<uint64_t, long double>>;
+        using WeightedGraph = std::map<uint64_t, std::map<uint64_t, long double>>;
+        using UnweightedGraph = std::map<uint64_t, std::set<uint64_t>>;
         using NodeList = std::list<Node>;
         using ConnectionList = std::list<Connection>;
 
@@ -94,7 +96,8 @@ class Genotype{
         std::set<uint64_t> output_nodes;
 
         // adjacency list strcture of the network
-        Graph graph;
+        WeightedGraph graph;
+        UnweightedGraph transpose_graph;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;
