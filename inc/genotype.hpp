@@ -1,6 +1,5 @@
 #pragma once
 
-#include <set>
 #include <map>
 #include <set>
 #include <list>
@@ -91,13 +90,9 @@ class Genotype{
         NodeList node_genes;
         ConnectionList connection_genes;
 
-        // record the input nodes id and the output nodes id
-        std::set<uint64_t> sensor_nodes;
-        std::set<uint64_t> output_nodes;
-
         // adjacency list strcture of the network
         WeightedGraph graph;
-        UnweightedGraph transpose_graph;
+        UnweightedGraph Tgraph;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

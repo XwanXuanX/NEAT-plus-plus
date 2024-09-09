@@ -8,7 +8,7 @@ int main(){
         Genotype g(3, 2);
         GenotypeProbing::dump(g);
         g.mutate();
-        GenotypeProbing::dump(g, "after-mutation.model");
+        GenotypeProbing::dump(g, "after-mutation");
         GenotypeProbing::generate_image(g);
 
 #if false

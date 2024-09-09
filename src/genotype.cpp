@@ -10,6 +10,7 @@
 #include <limits>
 #include <iostream>
 #include <deque>
+#include <algorithm>
 
 char Node::get_nodetype(const NodeType type) noexcept{
         if(type == NodeType::hidden) return 'H';
@@ -41,11 +42,9 @@ Genotype::Genotype(const int inputs, const int outputs){
         // create all the nodes
         using std::uint64_t;
         for(uint64_t i = 1; i <= inputs; ++i)
-                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::sensor}), \
-                sensor_nodes.insert(i);
+                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::sensor});
         for(uint64_t i = inputs + 1; i <= inputs + outputs; ++i)
-                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::output}), \
-                output_nodes.insert(i);
+                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::output});
         
         // create all the edges
         for(uint64_t i = 1; i <= inputs; ++i){
@@ -97,10 +96,6 @@ Genotype::Genotype(const std::filesystem::path& model_file){
         for(int i = 0; i < size; ++i){
                 NodeType t = Node::get_nodetype(node_types.at(i));
                 node_genes.push_back(Node{.node_number = node_ids.at(i), .node_type = t});
-                if(t == NodeType::output)
-                        output_nodes.insert(node_ids.at(i));
-                else if(t == NodeType::sensor)
-                        sensor_nodes.insert(node_ids.at(i));
         }
 
         infile >> size; // read the number of connections
@@ -150,6 +145,14 @@ void Genotype::mutate(){
         add_node();
         add_node();
         add_node();
+        add_connection();
+        add_connection();
+        add_connection();
+        add_connection();
+        add_connection();
+        add_connection();
+        add_connection();
+        add_connection();
 }
 
 // helper method to construct graph based on connection list
@@ -157,7 +160,7 @@ void Genotype::construct_graph(const ConnectionList& connections){
         for(auto connection : connections){
                 if(connection.enable){
                         graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
-                        transpose_graph[connection.out].insert(connection.in);
+                        Tgraph[connection.out].insert(connection.in);
                 }
         }
 }
@@ -210,45 +213,48 @@ bool Genotype::add_connection(){
          * in the topological ordering
          */
 
-        // find the topological ordering
-        std::vector<uint64_t> top_order = top_sort();
-
-        /**
-         * by the definition of top sort, top_order's structure will be like this:
-         * S S S ... H H H ... O O O ...
-         * therefore we can partition the top_order into 3 segments
-         */
-        auto get_first_hidden = [this](const std::vector<uint64_t>& top_order){
-                std::size_t first_hidden{};
-                for(std::size_t i = 0; i < top_order.size(); ++i){
-                        first_hidden = std::max(first_hidden, i);
-                        if(!sensor_nodes.count(top_order.at(i)))
-                                break;
-                }
-                return first_hidden;
-        };
-        auto get_last_hidden = [this](const std::vector<uint64_t>& top_order){
-                std::size_t last_hidden{top_order.size()};
-                for(std::size_t i = top_order.size() - 1; i >= 0; --i){
-                        last_hidden = std::min(last_hidden, i);
-                        if(!output_nodes.count(top_order.at(i)))
-                                break;
-                }
-                return last_hidden;
-        };
-
-        std::size_t first_hidden = get_first_hidden(top_order);
-        std::size_t last_hidden = get_last_hidden(top_order);
-        bool has_hidden = first_hidden <= last_hidden;
-
         // if no hidden nodes, then the graph is already fully connected, no connections can be added
+        bool has_hidden = std::any_of(node_genes.begin(), node_genes.end(),
+                [this](const Node& node){ return node.node_type == NodeType::hidden;});
         if(!has_hidden)
                 return false;
-        
-        // generate the in node of the new connection
-        std::size_t in_node_idx = rand_select({0, last_hidden});
-        std::size_t out_node_idx = rand_select({std::max(in_node_idx + 1, first_hidden), top_order.size() - 1});
-        uint64_t in_node = top_order.at(in_node_idx), out_node = top_order.at(out_node_idx);
+
+        auto generate_in = [this](){
+                std::vector<uint64_t> can;
+                for(auto node : node_genes)
+                        if(node.node_type != NodeType::output)
+                                can.push_back(node.node_number);
+                // randomly select one candidate
+                return can.at(rand_select({0, can.size() - 1}));
+        };
+
+        auto generate_out = [this](const uint64_t in_node){
+                std::set<uint64_t> reachable;
+                std::deque<uint64_t> q;
+                q.push_back(in_node);
+
+                while(!q.empty()){
+                        uint64_t node = q.front();
+                        q.pop_front();
+                        if(reachable.count(node))
+                                continue;
+                        reachable.insert(node);
+                        if(!Tgraph.count(node))
+                                continue;
+                        for(auto adj : Tgraph.at(node))
+                                q.push_back(adj);
+                }
+
+                std::vector<uint64_t> can;
+                for(auto node : node_genes)
+                        if(node.node_type != NodeType::sensor && !reachable.count(node.node_number))
+                                can.push_back(node.node_number);
+                
+                return can.at(rand_select({0, can.size() - 1}));
+        };
+
+        uint64_t in_node = generate_in();
+        uint64_t out_node = generate_out(in_node);
 
         // check if the connection already exists
         if(graph.at(in_node).count(out_node)) // fast method - check for enabled connections
@@ -256,7 +262,7 @@ bool Genotype::add_connection(){
         for(auto& connection : connection_genes) // slow method - check all connections, including the disabled ones
                 if(in_node == connection.in && out_node == connection.out)
                         return false;
-        
+
         // add the new connection
         connection_genes.push_back(Connection{
                 .in = in_node, .out = out_node, .weight = 1,
@@ -267,6 +273,7 @@ bool Genotype::add_connection(){
                 .innov = 1
         });
         graph[in_node].insert(std::make_pair(out_node, 1));
+        Tgraph[out_node].insert(in_node);
 
         // after adding the new connection, validate the new connection does not introduce a cycle
         try{ top_sort(); }
@@ -322,10 +329,13 @@ bool Genotype::add_node() {
         // update the graph with the new connections
         // remove the disabled connection
         graph[connection.in].erase(connection.out);
+        Tgraph[connection.out].erase(connection.in);
         // add the connection from input node of the connection to the new node to the graph
         graph[connection.in].insert(std::make_pair(new_node.node_number, 1.0));
+        Tgraph[new_node.node_number].insert(connection.in);
         // add the second new connection to the graph
         graph[new_node.node_number].insert(std::make_pair(connection.out, connection.weight));
+        Tgraph[connection.out].insert(new_node.node_number);
 
         return true;
 }
