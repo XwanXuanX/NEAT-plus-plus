@@ -208,23 +208,61 @@ bool Genotype::add_connection(){
          * S S S ... H H H ... O O O ...
          * therefore we can partition the top_order into 3 segments
          */
+        auto get_first_hidden = [this](const std::vector<uint64_t>& top_order){
+                std::size_t first_hidden{};
+                for(std::size_t i = 0; i < top_order.size(); ++i){
+                        first_hidden = std::max(first_hidden, i);
+                        if(!sensor_nodes.count(top_order.at(i)))
+                                break;
+                }
+                return first_hidden;
+        };
+        auto get_last_hidden = [this](const std::vector<uint64_t>& top_order){
+                std::size_t last_hidden{top_order.size()};
+                for(std::size_t i = top_order.size() - 1; i >= 0; --i){
+                        last_hidden = std::min(last_hidden, i);
+                        if(!output_nodes.count(top_order.at(i)))
+                                break;
+                }
+                return last_hidden;
+        };
 
+        std::size_t first_hidden = get_first_hidden(top_order);
+        std::size_t last_hidden = get_last_hidden(top_order);
+        bool has_hidden = first_hidden <= last_hidden;
 
+        // if no hidden nodes, then the graph is already fully connected, no connections can be added
+        if(!has_hidden)
+                return false;
+        
+        // generate the in node of the new connection
+        std::size_t in_node_idx = rand_select({0, last_hidden});
+        std::size_t out_node_idx = rand_select({std::max(in_node_idx + 1, first_hidden), top_order.size() - 1});
+        uint64_t in_node = top_order.at(in_node_idx), out_node = top_order.at(out_node_idx);
 
+        // check if the connection already exists
+        if(graph.at(in_node).count(out_node)) // fast method - check for enabled connections
+                return false;
+        for(auto& connection : connection_genes) // slow method - check all connections, including the disabled ones
+                if(in_node == connection.in && out_node == connection.out)
+                        return false;
+        
+        // add the new connection
+        connection_genes.push_back(Connection{
+                .in = in_node, .out = out_node, .enable = true,
+                .weight = 1,
+                /**
+                 * FIXME: implement the actural innovation number later
+                 */
+                .innov = 1
+        });
+        graph[in_node].insert(std::make_pair(out_node, 1));
 
+        // after adding the new connection, validate the new connection does not introduce a cycle
+        try{ top_sort(); }
+        catch(const std::runtime_error& e){
+                throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"new connection introduce a cycle"));
+        }
 
-
-
-
-
-
-
-
-        for(auto node : order)
-                std::cout << node << ' ';
-        std::cout << std::endl;
-
-
-
-        return false;
+        return true;
 }
