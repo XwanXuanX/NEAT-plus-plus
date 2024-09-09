@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <list>
 #include <vector>
 #include <string>
@@ -84,6 +85,10 @@ class Genotype{
         // linked list support O(1) operations (compared to using vector)
         NodeList node_genes;
         ConnectionList connection_genes;
+
+        // record the input nodes id and the output nodes id
+        std::set<uint64_t> sensor_nodes;
+        std::set<uint64_t> output_nodes;
 
         // adjacency list strcture of the network
         Graph graph;

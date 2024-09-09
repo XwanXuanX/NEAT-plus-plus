@@ -41,9 +41,11 @@ Genotype::Genotype(const int inputs, const int outputs){
         // create all the nodes
         using std::uint64_t;
         for(uint64_t i = 1; i <= inputs; ++i)
-                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::sensor});
+                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::sensor}), \
+                sensor_nodes.insert(i);
         for(uint64_t i = inputs + 1; i <= inputs + outputs; ++i)
-                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::output});
+                node_genes.push_back(Node{.node_number = i, .node_type = NodeType::output}), \
+                output_nodes.insert(i);
         
         // create all the edges
         for(uint64_t i = 1; i <= inputs; ++i){
@@ -93,10 +95,12 @@ Genotype::Genotype(const std::filesystem::path& model_file){
                 infile >> type, node_types.push_back(type);
         // now using node id and node type create the node gene list
         for(int i = 0; i < size; ++i){
-                node_genes.push_back(Node{
-                        .node_number = node_ids.at(i),
-                        .node_type = Node::get_nodetype(node_types.at(i))
-                });
+                NodeType t = Node::get_nodetype(node_types.at(i));
+                node_genes.push_back(Node{.node_number = node_ids.at(i), .node_type = t});
+                if(t == NodeType::output)
+                        output_nodes.insert(node_ids.at(i));
+                else if(t == NodeType::sensor)
+                        sensor_nodes.insert(node_ids.at(i));
         }
 
         infile >> size; // read the number of connections
@@ -188,7 +192,39 @@ auto Genotype::top_sort() const -> std::vector<uint64_t>{
 
 // add random connection mutation - return if the connection is successfully added
 bool Genotype::add_connection(){
-        std::vector<uint64_t> order = top_sort();
+        /**
+         * randomly generate the in node and the out node
+         * out node can be any hidden nodes or output nodes
+         * in node can be any sensor nodes or hidden nodes
+         * another requirement is that the index or the out node must be strictly greater than that of the in node,
+         * in the topological ordering
+         */
+
+        // find the topological ordering
+        std::vector<uint64_t> top_order = top_sort();
+
+        /**
+         * by the definition of top sort, top_order's structure will be like this:
+         * S S S ... H H H ... O O O ...
+         * therefore we can partition the top_order into 3 segments
+         */
+
+
+
+
+
+
+
+
+
+
+
+
+        for(auto node : order)
+                std::cout << node << ' ';
+        std::cout << std::endl;
+
+
 
         return false;
 }
