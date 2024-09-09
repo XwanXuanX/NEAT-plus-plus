@@ -129,6 +129,19 @@ Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
         return {{1,1}}; // hard-coded for the purpose of testing XorGame class
 }
 
+// randomly mutate the genotype
+void Genotype::mutate(){
+        /**
+         * FIXME: FILL ME UP PLS!
+         * FIXME: used as a testing method for other types of mutations
+         */
+
+        if(add_connection())
+                std::cout << "Connection added successfully\n";
+        else
+                std::cout << "Connection added failed\n";
+}
+
 // helper method to construct graph based on connection list
 void Genotype::construct_graph(const ConnectionList& connections){
         for(auto connection : connections)
@@ -140,7 +153,7 @@ void Genotype::construct_graph(const ConnectionList& connections){
 auto Genotype::top_sort() const -> std::vector<uint64_t>{
         // this method use Kahn's algorithm for topological ordering
 
-        std::vector<uint64_t> indeg(node_genes.size(), 0);
+        std::vector<uint64_t> indeg(node_genes.size() + 1, 0); // node id start from 1
         // calculate the in degree of each vertex
         for(auto& connection : connection_genes)
                 indeg[connection.out]++;
@@ -156,7 +169,9 @@ auto Genotype::top_sort() const -> std::vector<uint64_t>{
                 uint64_t node = q.front();
                 q.pop_front();
                 res.push_back(node);
-                // decrease the degree of adjacent nodes
+                // decrease the degree of adjacent nodes; if no adjacent nodes (ie. output nodes) skip
+                if(!graph.count(node))
+                        continue;
                 for(auto& adj : graph.at(node)){
                         indeg[adj.first]--;
                         if(indeg[adj.first] == 0)
@@ -169,4 +184,11 @@ auto Genotype::top_sort() const -> std::vector<uint64_t>{
                 throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"graph contains cycle(s)!"));
 
         return res;
+}
+
+// add random connection mutation - return if the connection is successfully added
+bool Genotype::add_connection(){
+        std::vector<uint64_t> order = top_sort();
+
+        return false;
 }

@@ -60,6 +60,9 @@ class Genotype{
         // using the input data, propogate the network and compute for the output
         DataPkt evaluate(const DataPkt& pkt);
 
+        // randomly mutate the genotype
+        void mutate();
+
     public: // public member variables
         // the score (fitness level) of a genotype
         long double fitness;
@@ -72,6 +75,9 @@ class Genotype{
 
         // helper method to generate the topological ordering of the graph
         auto top_sort() const -> std::vector<uint64_t>;
+
+        // add random connection mutation - return if the connection is successfully added
+        bool add_connection();
 
     private: // private member variables
         // we would prefer using a linked list to store all the node genes and connection genes
