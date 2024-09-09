@@ -59,10 +59,8 @@ Genotype::Genotype(const int inputs, const int outputs){
                 }
         }
 
-        /**
-         * FIXME: After adding the graph representation of the network,
-         * FIXME: also construct the graph HERE!
-         */
+        // construct graph representation of the initial network
+        construct_graph(connection_genes);
 }
 
 // another way to construct a genotype is by reading from a .model file
@@ -116,10 +114,8 @@ Genotype::Genotype(const std::filesystem::path& model_file){
                 });
         }
 
-        /**
-         * FIXME: After adding the graph representation of the network,
-         * FIXME: also construct the graph HERE!
-         */
+        // construct graph representation of the initial network
+        construct_graph(connection_genes);
 }
 
 // using the input data, propogate the network and compute for the output
@@ -130,4 +126,11 @@ Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
          */
 
         return {{1,1}}; // hard-coded for the purpose of testing XorGame class
+}
+
+// helper method to construct graph based on connection list
+void Genotype::construct_graph(const ConnectionList& connections){
+        for(auto connection : connections)
+                if(connection.enable)
+                        graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
 }
