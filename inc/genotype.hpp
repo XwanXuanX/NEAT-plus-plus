@@ -1,7 +1,9 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <list>
+#include <vector>
 #include <string>
 #include <cstdint>
 #include <utility>
@@ -46,7 +48,8 @@ class Genotype{
         using DataPkt = std::map<uint64_t, long double>;
         // map is a set of pairs itself; easier to write, have move functionalities,
         // and two level indexing makes updating an edge weight O(2logN)
-        using Graph = std::map<uint64_t, std::map<uint64_t, long double>>;
+        using WeightedGraph = std::map<uint64_t, std::map<uint64_t, long double>>;
+        using UnweightedGraph = std::map<uint64_t, std::set<uint64_t>>;
         using NodeList = std::list<Node>;
         using ConnectionList = std::list<Connection>;
 
@@ -59,23 +62,37 @@ class Genotype{
         // using the input data, propogate the network and compute for the output
         DataPkt evaluate(const DataPkt& pkt);
 
+        // randomly mutate the genotype
+        void mutate();
+
     public: // public member variables
         // the score (fitness level) of a genotype
         long double fitness;
 
-    private:
+    private: // private member function
         friend struct GenotypeProbing; // linking printing utils
 
+        // helper method to construct graph based on connection list
+        void construct_graph(const ConnectionList& connections);
+
+        // helper method to generate the topological ordering of the graph
+        auto top_sort() const -> std::vector<uint64_t>;
+
+        // add random connection mutation - return if the connection is successfully added
+        bool add_connection();
+
+        // add random node mutation - return if the node is successfully added
+        bool add_node();
+
+    private: // private member variables
         // we would prefer using a linked list to store all the node genes and connection genes
         // linked list support O(1) operations (compared to using vector)
         NodeList node_genes;
         ConnectionList connection_genes;
 
         // adjacency list strcture of the network
-        Graph graph;
-
-        // helper method to construct graph based on connection list
-        void construct_graph(const ConnectionList& connections);
+        WeightedGraph graph;
+        UnweightedGraph Tgraph;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

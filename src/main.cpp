@@ -7,8 +7,11 @@ int main(){
         // testing genotype.dump method
         Genotype g(3, 2);
         GenotypeProbing::dump(g);
-        // GenotypeProbing::generate_image(g);
+        g.mutate();
+        GenotypeProbing::dump(g, "after-mutation");
+        GenotypeProbing::generate_image(g);
 
+#if false
         // testing genotype.constructor
         Genotype t("1.model");
         GenotypeProbing::dump(t);
@@ -18,6 +21,7 @@ int main(){
         XorGame game(2);
         game.loop(g);
         std::cout << g.fitness << std::endl;
+#endif
 
         return 0;
 }

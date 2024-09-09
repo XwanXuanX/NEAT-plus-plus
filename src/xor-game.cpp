@@ -18,11 +18,9 @@ void XorGame::initialize(Genotype& geno){
 XorGame::DataPkt XorGame::collect() const{
         // assuming node 1~in_pin is used for inputs
         DataPkt pkt;
-        std::random_device rd{};
-        std::uniform_int_distribution<int> uid(0,99);
 
         // generating random inputs
-        auto gen_random_bits = [&uid, &rd]() { return uid(rd) >= 50; };
+        auto gen_random_bits = []() { return rand_select({0, 99}) >= 50; };
         for(int i = 1; i <= in_pin; ++i)
                 pkt.insert(std::make_pair(i, gen_random_bits()));
         
