@@ -1,6 +1,5 @@
 #include "xor-game.hpp"
 #include "utility.hpp"
-#include "utility.hpp"
 #include <stdexcept>
 #include <cassert>
 
