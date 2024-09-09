@@ -80,6 +80,9 @@ class Genotype{
         // add random connection mutation - return if the connection is successfully added
         bool add_connection();
 
+        // add random node mutation - return if the node is successfully added
+        bool add_node();
+
     private: // private member variables
         // we would prefer using a linked list to store all the node genes and connection genes
         // linked list support O(1) operations (compared to using vector)
