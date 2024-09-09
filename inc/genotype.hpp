@@ -5,7 +5,8 @@
 #include <cstdint>
 #include <string>
 #include <filesystem>
-#include <map>
+#include <set>
+#include <utility>
 
 // using declarations
 using std::uint64_t;
@@ -59,6 +60,8 @@ class Genotype{
         long double fitness;
 
     private:
+        using Graph = std::map<uint64_t, std::set<std::pair<uint64_t, long double>>>;
+
         friend struct GenotypeProbing; // linking printing utils
 
         // we would prefer using a linked list to store all the node genes and connection genes
@@ -67,7 +70,10 @@ class Genotype{
         std::list<Connection> connection_genes;
 
         // adjacency list strcture of the network
-        std::map<int, std::list<int>> graph;
+        Graph graph;
+
+        // helper method to construct graph based on connection list
+        void construct_graph(const std::list<Connection>& connections);
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

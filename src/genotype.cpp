@@ -9,7 +9,6 @@
 #include <cassert>
 #include <limits>
 #include <iostream>
-#include <map>
 
 char Node::get_nodetype(const NodeType type) noexcept{
         if(type == NodeType::hidden) return 'H';
@@ -61,14 +60,7 @@ Genotype::Genotype(const int inputs, const int outputs){
         }
 
         // construct graph representation of the initial network
-        for(uint64_t i = 1; i <= inputs; ++i)
-                graph[i];
-
-        for(uint64_t i = 1; i <= inputs; ++i){
-                for(uint64_t o = inputs + 1; o <= inputs + outputs; ++o){ 
-                        graph.find(i)->second.push_back(o);
-                }
-        }
+        construct_graph(connection_genes);
 }
 
 // another way to construct a genotype is by reading from a .model file
@@ -123,13 +115,7 @@ Genotype::Genotype(const std::filesystem::path& model_file){
         }
 
         // construct graph representation of the initial network
-        for(Connection connection : connection_genes){
-                graph[connection.in];
-        }
-
-        for (Connection connection : connection_genes){
-                graph.find(connection.in)->second.push_back(connection.out);
-        }
+        construct_graph(connection_genes);
 }
 
 // using the input data, propogate the network and compute for the output
@@ -140,4 +126,11 @@ Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
          */
 
         return {{1,1}}; // hard-coded for the purpose of testing XorGame class
+}
+
+// helper method to construct graph based on connection list
+void Genotype::construct_graph(const std::list<Connection>& connections){
+        for(Connection connection : connection_genes)
+                if(connection.enable)
+                        graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
 }
