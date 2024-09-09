@@ -249,8 +249,8 @@ bool Genotype::add_connection(){
         
         // add the new connection
         connection_genes.push_back(Connection{
-                .in = in_node, .out = out_node, .enable = true,
-                .weight = 1,
+                .in = in_node, .out = out_node, .weight = 1,
+                .enable = true,
                 /**
                  * FIXME: implement the actural innovation number later
                  */
