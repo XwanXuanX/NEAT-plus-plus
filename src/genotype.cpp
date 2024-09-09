@@ -283,6 +283,7 @@ bool Genotype::add_node() {
         // generate a random connection to add node
         int64_t connection_index = rand_select({0, connection_genes.size() - 1});
         
+        
         auto it = connection_genes.begin();
         std::advance(it, connection_index);
         Connection& connection = *it;
