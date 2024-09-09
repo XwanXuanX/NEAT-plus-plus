@@ -9,6 +9,7 @@
 #include <cassert>
 #include <limits>
 #include <iostream>
+#include <deque>
 
 char Node::get_nodetype(const NodeType type) noexcept{
         if(type == NodeType::hidden) return 'H';
@@ -133,4 +134,39 @@ void Genotype::construct_graph(const ConnectionList& connections){
         for(auto connection : connections)
                 if(connection.enable)
                         graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
+}
+
+// helper method to generate the topological ordering of the graph
+auto Genotype::top_sort() const -> std::vector<uint64_t>{
+        // this method use Kahn's algorithm for topological ordering
+
+        std::vector<uint64_t> indeg(node_genes.size(), 0);
+        // calculate the in degree of each vertex
+        for(auto& connection : connection_genes)
+                indeg[connection.out]++;
+        
+        // obtain all the nodes with in degree 0
+        std::deque<uint64_t> q;
+        for(auto& node : node_genes)
+                if(indeg[node.node_number] == 0)
+                        q.push_back(node.node_number);
+        
+        std::vector<uint64_t> res;
+        while(!q.empty()){
+                uint64_t node = q.front();
+                q.pop_front();
+                res.push_back(node);
+                // decrease the degree of adjacent nodes
+                for(auto& adj : graph.at(node)){
+                        indeg[adj.first]--;
+                        if(indeg[adj.first] == 0)
+                                q.push_back(adj.first);
+                }
+        }
+
+        // check for a cycle
+        if(res.size() != node_genes.size())
+                throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"graph contains cycle(s)!"));
+
+        return res;
 }

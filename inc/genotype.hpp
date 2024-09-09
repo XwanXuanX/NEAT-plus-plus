@@ -2,6 +2,7 @@
 
 #include <map>
 #include <list>
+#include <vector>
 #include <string>
 #include <cstdint>
 #include <utility>
@@ -63,9 +64,16 @@ class Genotype{
         // the score (fitness level) of a genotype
         long double fitness;
 
-    private:
+    private: // private member function
         friend struct GenotypeProbing; // linking printing utils
 
+        // helper method to construct graph based on connection list
+        void construct_graph(const ConnectionList& connections);
+
+        // helper method to generate the topological ordering of the graph
+        auto top_sort() const -> std::vector<uint64_t>;
+
+    private: // private member variables
         // we would prefer using a linked list to store all the node genes and connection genes
         // linked list support O(1) operations (compared to using vector)
         NodeList node_genes;
@@ -73,9 +81,6 @@ class Genotype{
 
         // adjacency list strcture of the network
         Graph graph;
-
-        // helper method to construct graph based on connection list
-        void construct_graph(const ConnectionList& connections);
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;
