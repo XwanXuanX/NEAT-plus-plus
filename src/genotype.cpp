@@ -140,10 +140,10 @@ void Genotype::mutate(){
          * FIXME: used as a testing method for other types of mutations
          */
 
-        if(add_connection())
-                std::cout << "Connection added successfully\n";
+        if(add_node())
+                std::cout << "Node added successfully\n";
         else
-                std::cout << "Connection added failed\n";
+                std::cout << "Node added failed\n";
 }
 
 // helper method to construct graph based on connection list
@@ -263,6 +263,75 @@ bool Genotype::add_connection(){
         catch(const std::runtime_error& e){
                 throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"new connection introduce a cycle"));
         }
+
+        return true;
+}
+
+// add random node mutation - return if the node is successfully added
+bool Genotype::add_node() {
+        // check if there are existing connections 
+        if(connection_genes.empty()){
+                return false;
+        }
+
+        // generate a random connection to add node
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distr(0, connection_genes.size() - 1);
+
+        auto it = connection_genes.begin(); 
+        std::advance(it, distr(gen));    
+        Connection& connection = *it;
+
+        // disable the selected connection
+        if (connection.enable) {
+                connection.enable = false;
+        } else {
+                return false;
+        }
+
+        // create a new hidden node
+        Node new_node;
+        new_node.node_number = node_genes.size() + 1;
+        new_node.node_type = NodeType::hidden;
+        node_genes.push_back(new_node);
+
+        // create two new connections
+        // first connection: from input node of the disabled connection to the new node
+        connection_genes.push_back(Connection{
+                        .in = connection.in,
+                        .out = new_node.node_number,
+                        .weight = 1.0,
+                        .enable = true,
+                        /**
+                        * FIXME: each gene should pick up a new innovation number.
+                        * FIXME: this is a placeholder, should be implemented later!
+                        */
+                        .innov = 1
+        });
+
+        // second connection: from the new node to the original output node
+        connection_genes.push_back(Connection{
+                        .in = new_node.node_number,
+                        .out = connection.out,
+                        .weight = connection.weight,
+                        .enable = true,
+                        /**
+                        * FIXME: each gene should pick up a new innovation number.
+                        * FIXME: this is a placeholder, should be implemented later!
+                        */
+                        .innov = 1
+        });
+
+        // update the graph with the new connections
+        // remove the disabled connection
+        graph[connection.in].erase(connection.out);
+
+        // add the connection from input node of the connection to the new node to the graph
+        graph[connection.in].insert(std::make_pair(new_node.node_number, 1.0));
+
+        // add the second new connection to the graph
+        graph[new_node.node_number].insert(std::make_pair(connection.out, connection.weight));
 
         return true;
 }
