@@ -129,8 +129,8 @@ Genotype::DataPkt Genotype::evaluate(const Genotype::DataPkt& pkt){
 }
 
 // helper method to construct graph based on connection list
-void Genotype::construct_graph(const std::list<Connection>& connections){
-        for(Connection connection : connection_genes)
+void Genotype::construct_graph(const ConnectionList& connections){
+        for(auto connection : connections)
                 if(connection.enable)
                         graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
 }

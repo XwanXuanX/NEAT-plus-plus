@@ -2,11 +2,10 @@
 
 #include <map>
 #include <list>
-#include <cstdint>
 #include <string>
-#include <filesystem>
-#include <set>
+#include <cstdint>
 #include <utility>
+#include <filesystem>
 
 // using declarations
 using std::uint64_t;
@@ -45,6 +44,11 @@ struct Connection{
 class Genotype{
     public: // public member functions
         using DataPkt = std::map<uint64_t, long double>;
+        // map is a set of pairs itself; easier to write, have move functionalities,
+        // and two level indexing makes updating an edge weight O(2logN)
+        using Graph = std::map<uint64_t, std::map<uint64_t, long double>>;
+        using NodeList = std::list<Node>;
+        using ConnectionList = std::list<Connection>;
 
         // this constructor creates a network with no hidden nodes
         // inputs and outputs forms a fully connected graph, each edge receives a weight of 1;
@@ -60,20 +64,18 @@ class Genotype{
         long double fitness;
 
     private:
-        using Graph = std::map<uint64_t, std::set<std::pair<uint64_t, long double>>>;
-
         friend struct GenotypeProbing; // linking printing utils
 
         // we would prefer using a linked list to store all the node genes and connection genes
         // linked list support O(1) operations (compared to using vector)
-        std::list<Node> node_genes;
-        std::list<Connection> connection_genes;
+        NodeList node_genes;
+        ConnectionList connection_genes;
 
         // adjacency list strcture of the network
         Graph graph;
 
         // helper method to construct graph based on connection list
-        void construct_graph(const std::list<Connection>& connections);
+        void construct_graph(const ConnectionList& connections);
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;
