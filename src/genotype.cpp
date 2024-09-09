@@ -278,9 +278,9 @@ bool Genotype::add_node() {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distr(0, connection_genes.size() - 1);
-
-        auto it = connection_genes.begin(); 
-        std::advance(it, distr(gen));    
+        
+        auto it = connection_genes.begin();
+        std::advance(it, distr(gen));
         Connection& connection = *it;
 
         // disable the selected connection
