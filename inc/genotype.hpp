@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <filesystem>
+#include <map>
 
 // using declarations
 using std::uint64_t;
@@ -64,6 +65,9 @@ class Genotype{
         // linked list support O(1) operations (compared to using vector)
         std::list<Node> node_genes;
         std::list<Connection> connection_genes;
+
+        // adjacency list strcture of the network
+        std::map<int, std::list<int>> graph;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

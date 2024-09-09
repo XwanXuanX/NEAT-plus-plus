@@ -9,6 +9,7 @@
 #include <cassert>
 #include <limits>
 #include <iostream>
+#include <map>
 
 char Node::get_nodetype(const NodeType type) noexcept{
         if(type == NodeType::hidden) return 'H';
@@ -59,10 +60,15 @@ Genotype::Genotype(const int inputs, const int outputs){
                 }
         }
 
-        /**
-         * FIXME: After adding the graph representation of the network,
-         * FIXME: also construct the graph HERE!
-         */
+        // construct graph representation of the initial network
+        for(uint64_t i = 1; i <= inputs; ++i)
+                graph[i];
+
+        for(uint64_t i = 1; i <= inputs; ++i){
+                for(uint64_t o = inputs + 1; o <= inputs + outputs; ++o){ 
+                        graph.find(i)->second.push_back(o);
+                }
+        }
 }
 
 // another way to construct a genotype is by reading from a .model file
@@ -116,10 +122,14 @@ Genotype::Genotype(const std::filesystem::path& model_file){
                 });
         }
 
-        /**
-         * FIXME: After adding the graph representation of the network,
-         * FIXME: also construct the graph HERE!
-         */
+        // construct graph representation of the initial network
+        for(Connection connection : connection_genes){
+                graph[connection.in];
+        }
+
+        for (Connection connection : connection_genes){
+                graph.find(connection.in)->second.push_back(connection.out);
+        }
 }
 
 // using the input data, propogate the network and compute for the output
