@@ -1,18 +1,32 @@
 #include "graph-network.hpp"
+#include <utility>
+#include <cassert>
 
 // construct both graphs from list of connections
-void GraphNet::construct(const ConnectionList& connections){
-
+void GraphNet::construct(const GraphNet::ConnectionList& connections){
+        for(auto connection : connections){
+                if(connection.enable){
+                        assert(add(connection.in, connection.out, connection.weight));
+                }
+        }
 }
 
 // add an edge to both graphs - if edge already exists, return false
 bool GraphNet::add(NodeID in_node, NodeID out_node, const long double weight){
-
+        if(exist(in_node, out_node))
+                return false;
+        graph[in_node].insert(std::make_pair(out_node, weight));
+        Tgraph[out_node].insert(in_node);
+        return true;
 }
 
 // erase an edge from both graphs - if edge does not exist, return false
 bool GraphNet::erase(NodeID in_node, NodeID out_node){
-
+        if(!exist(in_node, out_node))
+                return false;
+        graph[in_node].erase(out_node);
+        Tgraph[out_node].erase(in_node);
+        return true;
 }
 
 // find all ancestors that can reach the target node via at least one path
@@ -42,26 +56,16 @@ uint64_t GraphNet::components() const{
 
 // check if an edge exists
 bool GraphNet::exist(NodeID in_node, NodeID out_node) const{
-
+        return (graph.count(in_node) && // in node must first exists and out node exists as a child of in node
+                graph.at(in_node).count(out_node));
 }
         
 
 
 
-// helper method to construct graph based on connection list
-void Genotype::construct_graph(const ConnectionList& connections){
-        for(auto connection : connections){
-                if(connection.enable){
-                        graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
-                        Tgraph[connection.out].insert(connection.in);
-                }
-        }
-}
 
 
-
-
-
+#if false
 // helper method to generate the topological ordering of the graph
 auto Genotype::top_sort() const -> std::vector<uint64_t>{
         // this method use Kahn's algorithm for topological ordering
@@ -99,3 +103,4 @@ auto Genotype::top_sort() const -> std::vector<uint64_t>{
 
         return res;
 }
+#endif

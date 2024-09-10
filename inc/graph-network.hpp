@@ -5,9 +5,7 @@
 #include <list>
 #include <vector>
 #include <cstdint>
-
-// forward class declarations
-struct Connection;
+#include "gene.hpp"
 
 // ASSUME ALL GRAPHS ARE DIRECTED!
 class GraphNet{
