@@ -43,6 +43,9 @@ class GraphNet{
         // count the number of connected components in the WEIGHTED graph
         uint64_t components() const;
 
+        // check if an edge exists
+        bool exist(NodeID in_node, NodeID out_node) const;
+        
     private:
         // adjacency list strcture of the network
         WeightedGraph graph;
