@@ -3,9 +3,10 @@
 #include <map>
 #include <set>
 #include <list>
+#include <deque>
 #include <vector>
 #include <cstdint>
-#include <variant>
+#include <type_traits>
 #include "gene.hpp"
 
 // ASSUME ALL GRAPHS ARE DIRECTED!
@@ -46,8 +47,37 @@ class GraphNet{
         bool exist(NodeID in_node, NodeID out_node) const;
         
     private:
-        // helper method to find reachable node
-        std::set<uint64_t> find_reachable(NodeID node, const std::variant<WeightedGraph, UnweightedGraph>& graph) const;
+        // helper method to find reachable nodes in either graphs
+        template<typename G>
+        inline auto find_reachable(NodeID node, const G& g) const -> std::set<uint64_t> {
+                std::set<uint64_t> reachable;
+                std::deque<uint64_t> q;
+                q.push_back(node);
+
+                while(!q.empty()){
+                        std::uint64_t node = q.front();
+                        q.pop_front();
+                        if(reachable.count(node))
+                                continue;
+                        reachable.insert(node);
+
+                        // add adjcent nodes
+                        if(!g.count(node))
+                                continue;
+                        for(auto adj : g.at(node)){
+                                q.push_back([]<typename T>(const T& v){
+                                        if constexpr(std::is_convertible_v<T, GraphNet::UnweightedGraph::mapped_type::value_type>)
+                                                return v;
+                                        else if constexpr(std::is_convertible_v<T, GraphNet::WeightedGraph::mapped_type::value_type>)
+                                                return v.first;
+                                        else
+                                                ;
+                                }(adj));
+                        }
+                }
+
+                return reachable;
+        }
         
         // adjacency list strcture of the network
         WeightedGraph graph;
