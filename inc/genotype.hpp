@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <utility>
 #include <filesystem>
+#include "graph-network.hpp"
 
 // using declarations
 using std::uint64_t;
@@ -46,10 +47,6 @@ struct Connection{
 class Genotype{
     public: // public member functions
         using DataPkt = std::map<uint64_t, long double>;
-        // map is a set of pairs itself; easier to write, have move functionalities,
-        // and two level indexing makes updating an edge weight O(2logN)
-        using WeightedGraph = std::map<uint64_t, std::map<uint64_t, long double>>;
-        using UnweightedGraph = std::map<uint64_t, std::set<uint64_t>>;
         using NodeList = std::list<Node>;
         using ConnectionList = std::list<Connection>;
 
@@ -72,12 +69,6 @@ class Genotype{
     private: // private member function
         friend struct GenotypeProbing; // linking printing utils
 
-        // helper method to construct graph based on connection list
-        void construct_graph(const ConnectionList& connections);
-
-        // helper method to generate the topological ordering of the graph
-        auto top_sort() const -> std::vector<uint64_t>;
-
         // add random connection mutation - return if the connection is successfully added
         bool add_connection();
 
@@ -90,9 +81,8 @@ class Genotype{
         NodeList node_genes;
         ConnectionList connection_genes;
 
-        // adjacency list strcture of the network
-        WeightedGraph graph;
-        UnweightedGraph Tgraph;
+        // graph-based representation of the network
+        GraphNet net;
 
         // each genotype will receive it's own id number, this is used to differentiate each genes
         inline static uint64_t id_counter = 0;

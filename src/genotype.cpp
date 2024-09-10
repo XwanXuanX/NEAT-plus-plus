@@ -9,7 +9,6 @@
 #include <cassert>
 #include <limits>
 #include <iostream>
-#include <deque>
 #include <algorithm>
 
 char Node::get_nodetype(const NodeType type) noexcept{
@@ -62,7 +61,7 @@ Genotype::Genotype(const int inputs, const int outputs){
         }
 
         // construct graph representation of the initial network
-        construct_graph(connection_genes);
+        net.construct(connection_genes);
 }
 
 // another way to construct a genotype is by reading from a .model file
@@ -115,7 +114,7 @@ Genotype::Genotype(const std::filesystem::path& model_file){
         }
 
         // construct graph representation of the initial network
-        construct_graph(connection_genes);
+        net.construct(connection_genes);
 }
 
 // using the input data, propogate the network and compute for the output
@@ -155,54 +154,6 @@ void Genotype::mutate(){
         add_connection();
 }
 
-// helper method to construct graph based on connection list
-void Genotype::construct_graph(const ConnectionList& connections){
-        for(auto connection : connections){
-                if(connection.enable){
-                        graph[connection.in].insert(std::make_pair(connection.out, connection.weight));
-                        Tgraph[connection.out].insert(connection.in);
-                }
-        }
-}
-
-// helper method to generate the topological ordering of the graph
-auto Genotype::top_sort() const -> std::vector<uint64_t>{
-        // this method use Kahn's algorithm for topological ordering
-
-        std::vector<uint64_t> indeg(node_genes.size() + 1, 0); // node id start from 1
-        // calculate the in degree of each vertex
-        for(auto& connection : connection_genes)
-                if(connection.enable)
-                        indeg[connection.out]++;
-        
-        // obtain all the nodes with in degree 0
-        std::deque<uint64_t> q;
-        for(auto& node : node_genes)
-                if(indeg[node.node_number] == 0)
-                        q.push_back(node.node_number);
-        
-        std::vector<uint64_t> res;
-        while(!q.empty()){
-                uint64_t node = q.front();
-                q.pop_front();
-                res.push_back(node);
-                // decrease the degree of adjacent nodes; if no adjacent nodes (ie. output nodes) skip
-                if(!graph.count(node))
-                        continue;
-                for(auto& adj : graph.at(node)){
-                        indeg[adj.first]--;
-                        if(indeg[adj.first] == 0)
-                                q.push_back(adj.first);
-                }
-        }
-
-        // check for a cycle
-        if(res.size() != node_genes.size())
-                throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"graph contains cycle(s)!"));
-
-        return res;
-}
-
 // add random connection mutation - return if the connection is successfully added
 bool Genotype::add_connection(){
         /**
@@ -229,27 +180,12 @@ bool Genotype::add_connection(){
         };
 
         auto generate_out = [this](const uint64_t in_node){
-                std::set<uint64_t> reachable;
-                std::deque<uint64_t> q;
-                q.push_back(in_node);
-
-                while(!q.empty()){
-                        uint64_t node = q.front();
-                        q.pop_front();
-                        if(reachable.count(node))
-                                continue;
-                        reachable.insert(node);
-                        if(!Tgraph.count(node))
-                                continue;
-                        for(auto adj : Tgraph.at(node))
-                                q.push_back(adj);
-                }
-
+                std::set<uint64_t> reachable = net.ancestors(in_node);
                 std::vector<uint64_t> can;
                 for(auto node : node_genes)
                         if(node.node_type != NodeType::sensor && !reachable.count(node.node_number))
                                 can.push_back(node.node_number);
-                
+                // randomly select one candidate
                 return can.at(rand_select({0, can.size() - 1}));
         };
 
@@ -257,12 +193,12 @@ bool Genotype::add_connection(){
         uint64_t out_node = generate_out(in_node);
 
         // check if the connection already exists
-        if(graph.at(in_node).count(out_node)) // fast method - check for enabled connections
+        if(net.exist(in_node, out_node)) // fast method - check for enabled connections
                 return false;
         for(auto& connection : connection_genes) // slow method - check all connections, including the disabled ones
                 if(in_node == connection.in && out_node == connection.out)
                         return false;
-
+        
         // add the new connection
         connection_genes.push_back(Connection{
                 .in = in_node, .out = out_node, .weight = 1,
@@ -272,14 +208,11 @@ bool Genotype::add_connection(){
                  */
                 .innov = 1
         });
-        graph[in_node].insert(std::make_pair(out_node, 1));
-        Tgraph[out_node].insert(in_node);
+        net.add(in_node, out_node, 1);
 
         // after adding the new connection, validate the new connection does not introduce a cycle
-        try{ top_sort(); }
-        catch(const std::runtime_error& e){
+        if(net.has_cycle())
                 throw std::runtime_error(make_errmsg(__FILE__,__LINE__,"new connection introduce a cycle"));
-        }
 
         return true;
 }
@@ -328,14 +261,11 @@ bool Genotype::add_node() {
 
         // update the graph with the new connections
         // remove the disabled connection
-        graph[connection.in].erase(connection.out);
-        Tgraph[connection.out].erase(connection.in);
+        net.erase(connection.in, connection.out);
         // add the connection from input node of the connection to the new node to the graph
-        graph[connection.in].insert(std::make_pair(new_node.node_number, 1.0));
-        Tgraph[new_node.node_number].insert(connection.in);
+        net.add(connection.in, new_node.node_number, 1);
         // add the second new connection to the graph
-        graph[new_node.node_number].insert(std::make_pair(connection.out, connection.weight));
-        Tgraph[connection.out].insert(new_node.node_number);
+        net.add(new_node.node_number, connection.out, connection.weight);
 
         return true;
 }
