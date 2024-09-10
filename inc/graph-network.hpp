@@ -82,4 +82,7 @@ class GraphNet{
         // adjacency list strcture of the network
         WeightedGraph graph;
         UnweightedGraph Tgraph;
+
+        // keep track of the number of nodes in the network
+        uint64_t node_count = 0;
 };

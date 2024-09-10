@@ -15,8 +15,14 @@ void GraphNet::construct(const GraphNet::ConnectionList& connections){
 bool GraphNet::add(NodeID in_node, NodeID out_node, const long double weight){
         if(exist(in_node, out_node))
                 return false;
+        // add to both graphs
         graph[in_node].insert(std::make_pair(out_node, weight));
         Tgraph[out_node].insert(in_node);
+
+        // keep updating the highest node number when adding edges
+        // new node must be added through adding edges
+        node_count = std::max(node_count, std::max(in_node, out_node));
+
         return true;
 }
 
@@ -24,8 +30,10 @@ bool GraphNet::add(NodeID in_node, NodeID out_node, const long double weight){
 bool GraphNet::erase(NodeID in_node, NodeID out_node){
         if(!exist(in_node, out_node))
                 return false;
+        // erase from both graphs
         graph[in_node].erase(out_node);
         Tgraph[out_node].erase(in_node);
+
         return true;
 }
 
