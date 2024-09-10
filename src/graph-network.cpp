@@ -1,7 +1,6 @@
 #include "graph-network.hpp"
 #include <utility>
 #include <cassert>
-#include <deque>
 
 // construct both graphs from list of connections
 void GraphNet::construct(const GraphNet::ConnectionList& connections){
@@ -32,12 +31,12 @@ bool GraphNet::erase(NodeID in_node, NodeID out_node){
 
 // find all ancestors that can reach the target node via at least one path
 std::set<uint64_t> GraphNet::ancestors(NodeID node) const{
-        return find_reachable(node, graph);
+        return find_reachable(node, Tgraph);
 }
 
 // find all children that is reachable from the target node via at least one path
 std::set<uint64_t> GraphNet::children(NodeID node) const{
-        return find_reachable(node, Tgraph);
+        return find_reachable(node, graph);
 }
 
 // return the topological ordering of the WEIGHTED graph
@@ -53,33 +52,6 @@ bool GraphNet::has_cycle() const{
 // count the number of connected components in the WEIGHTED graph
 uint64_t GraphNet::components() const{
 
-}
-
-std::set<uint64_t> GraphNet::find_reachable(NodeID node, const std::variant<WeightedGraph, UnweightedGraph>& input_graph) const{
-        std::set<uint64_t> reachable;
-        std::deque<uint64_t> q;
-        q.push_back(node);
-
-        while(!q.empty()){
-                uint64_t node = q.front();
-                q.pop_front();
-                if(reachable.count(node))
-                        continue;
-                reachable.insert(node);
-                if (std::holds_alternative<WeightedGraph>(input_graph)) {
-                        if(!graph.count(node))
-                                continue;
-                        for(auto adj : graph.at(node))
-                                q.push_back(adj.first);
-                } else if (std::holds_alternative<UnweightedGraph>(input_graph)) {
-                        if(!Tgraph.count(node))
-                                continue;
-                        for(auto adj : Tgraph.at(node))
-                                q.push_back(adj);
-                }
-        }
-
-        return reachable;
 }
 
 // check if an edge exists
