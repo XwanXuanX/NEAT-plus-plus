@@ -34,4 +34,5 @@ add_executable(neat
         ${prob_src}
         ${xor_game_src}
         ${graph_network_src}
+        ${gene_src}
 )

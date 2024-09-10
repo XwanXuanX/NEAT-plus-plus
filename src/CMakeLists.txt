@@ -4,6 +4,7 @@ set(genotype_src genotype.cpp)
 set(prob_src prob.cpp)
 set(xor_game_src xor-game.cpp)
 set(graph_network_src graph-network.cpp)
+set(gene_src gene.cpp)
 
 # Form the full path to the source files...
 PREPEND(main_src)
@@ -12,6 +13,7 @@ PREPEND(genotype_src)
 PREPEND(prob_src)
 PREPEND(xor_game_src)
 PREPEND(graph_network_src)
+PREPEND(gene_src)
 
 # ... and pass the variable to the parent scope.
 set(main_src ${main_src}  PARENT_SCOPE)
@@ -20,3 +22,4 @@ set(genotype_src ${genotype_src}  PARENT_SCOPE)
 set(prob_src ${prob_src} PARENT_SCOPE)
 set(xor_game_src ${xor_game_src} PARENT_SCOPE)
 set(graph_network_src ${graph_network_src} PARENT_SCOPE)
+set(gene_src ${gene_src} PARENT_SCOPE)
