@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 #include <cstdint>
+#include <variant>
 #include "gene.hpp"
 
 // ASSUME ALL GRAPHS ARE DIRECTED!
@@ -48,4 +49,7 @@ class GraphNet{
         // adjacency list strcture of the network
         WeightedGraph graph;
         UnweightedGraph Tgraph;
+
+        // helper method to find reachable node
+        std::set<uint64_t> GraphNet::find_reachable(NodeID node, std::variant<WeightedGraph, UnweightedGraph> graph) const;
 };
