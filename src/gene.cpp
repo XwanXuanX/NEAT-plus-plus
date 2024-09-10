@@ -1,6 +1,7 @@
 #include "gene.hpp"
 #include <iomanip>
 #include <sstream>
+#include <limits>
 
 // return the char representation of node type (when printing the node types)
 char Node::get_nodetype(const NodeType type) noexcept{

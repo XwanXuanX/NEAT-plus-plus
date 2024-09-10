@@ -55,7 +55,7 @@ uint64_t GraphNet::components() const{
 
 }
 
-std::set<uint64_t> GraphNet::find_reachable(NodeID node, std::variant<WeightedGraph, UnweightedGraph> graph_input) const{
+std::set<uint64_t> GraphNet::find_reachable(NodeID node, const std::variant<WeightedGraph, UnweightedGraph>& input_graph) const{
         std::set<uint64_t> reachable;
         std::deque<uint64_t> q;
         q.push_back(node);
@@ -66,18 +66,20 @@ std::set<uint64_t> GraphNet::find_reachable(NodeID node, std::variant<WeightedGr
                 if(reachable.count(node))
                         continue;
                 reachable.insert(node);
-                if (std::holds_alternative<WeightedGraph>(graph_input)) {
+                if (std::holds_alternative<WeightedGraph>(input_graph)) {
                         if(!graph.count(node))
                                 continue;
                         for(auto adj : graph.at(node))
                                 q.push_back(adj.first);
-                } else if (std::holds_alternative<UnweightedGraph>(graph_input)) {
+                } else if (std::holds_alternative<UnweightedGraph>(input_graph)) {
                         if(!Tgraph.count(node))
                                 continue;
                         for(auto adj : Tgraph.at(node))
                                 q.push_back(adj);
                 }
         }
+
+        return reachable;
 }
 
 // check if an edge exists

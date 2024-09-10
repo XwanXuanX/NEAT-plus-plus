@@ -46,10 +46,10 @@ class GraphNet{
         bool exist(NodeID in_node, NodeID out_node) const;
         
     private:
+        // helper method to find reachable node
+        std::set<uint64_t> find_reachable(NodeID node, const std::variant<WeightedGraph, UnweightedGraph>& graph) const;
+        
         // adjacency list strcture of the network
         WeightedGraph graph;
         UnweightedGraph Tgraph;
-
-        // helper method to find reachable node
-        std::set<uint64_t> GraphNet::find_reachable(NodeID node, std::variant<WeightedGraph, UnweightedGraph> graph) const;
 };
