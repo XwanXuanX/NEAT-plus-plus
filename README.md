@@ -2,7 +2,7 @@
 
 ## Example of NEAT network
 
-![net](./doc/1.png)
+![net](./doc/example-net.png)
 
 ## General coding style guide
 
