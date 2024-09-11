@@ -1,5 +1,9 @@
 # NEAT++
 
+## Example of NEAT network
+
+![net](./doc/1.png)
+
 ## General coding style guide
 
 1. Please, use 8 SPACE indentation
