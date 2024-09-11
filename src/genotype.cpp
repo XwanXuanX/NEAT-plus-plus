@@ -131,6 +131,14 @@ void Genotype::mutate(){
         add_connection();
         add_connection();
         add_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
+        toggle_connection();
 }
 
 // add random connection mutation - return if the connection is successfully added
@@ -246,5 +254,23 @@ bool Genotype::add_node() {
         // add the second new connection to the graph
         net.add(new_node.node_number, connection.out, connection.weight);
 
+        return true;
+}
+
+// randomly toggle (disable & enable) a connection - always success
+bool Genotype::toggle_connection(){
+        // randomly select one edge
+        auto it = connection_genes.begin();
+        std::advance(it, rand_select({0, connection_genes.size() - 1}));
+        Connection& connection = *it;
+
+        // toggle the connection
+        connection.enable = !connection.enable;
+        // update the edge in GraphNet
+        if(connection.enable)
+                assert(net.add(connection.in, connection.out, connection.weight));
+        else
+                assert(net.erase(connection.in, connection.out));
+        
         return true;
 }
