@@ -3,6 +3,7 @@
 #include <utility>
 #include <cassert>
 #include <stdexcept>
+#include <functional>
 #include <deque>
 
 // construct both graphs from list of connections
@@ -90,7 +91,41 @@ std::vector<uint64_t> GraphNet::topsort() const{
 
 // check if there exists a cycle in the WEIGHTED graph
 bool GraphNet::has_cycle() const{
+        // this method use DFS to detect a cycle in a directed graph
+        // a cycle exists iff exists at least one back edge, so, you know...
 
+        std::set<uint64_t> vis;
+        // the recursive call stack tracks all the visited nodes in the current dfs run
+        // if have an edge pointing back to one of the visited nodes, it's a back edge
+        std::set<uint64_t> stk;
+
+        std::function<bool(const uint64_t node)> dfs;
+        dfs = [&, this](const uint64_t node) -> bool {
+                if(!vis.count(node)){
+                        vis.insert(node);
+                        // if the node has no outgoing edges, simply end this search
+                        if(!graph.count(node))
+                                return false;
+                        stk.insert(node);
+
+                        for(auto& adj : graph.at(node)){
+                                if(!vis.count(adj.first) && dfs(adj.first))
+                                        return true;
+                                else if(stk.count(adj.first))
+                                        return true;
+                        }
+                }
+
+                // remove the node from the call stack
+                stk.erase(node);
+                return false;
+        };
+
+        for(uint64_t node = 1; node <= node_count; ++node)
+                if(!vis.count(node) && dfs(node))
+                        return true;
+        
+        return false;
 }
 
 // check if an edge exists
