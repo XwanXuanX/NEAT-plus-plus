@@ -7,32 +7,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Define a project
 project(NEAT VERSION 1.0)
-set(NEAT_VERSION 1.0)
 
-
-# Function to prepend the subdirectory to source files in subdirectories
-FUNCTION(PREPEND var )
-   SET(listVar "")
-   FOREACH(f ${${var}})
-       LIST(APPEND listVar "${CMAKE_CURRENT_SOURCE_DIR}/${f}")
-   ENDFOREACH(f)
-   SET(${var} "${listVar}" PARENT_SCOPE)
-ENDFUNCTION(PREPEND)
-
-
-# Include source code and headers. This calls the CMakeLists.txt in each
-# subdirectory.
+# Recursive call CMakeList in src dir
 add_subdirectory(src)
-add_subdirectory(inc)
 
-# Repo structure
+# Include the include dir
 include_directories(inc)
-add_executable(neat 
-        ${main_src}
-        ${genotype_src}
-        ${utility_src}
-        ${prob_src}
-        ${xor_game_src}
-        ${graph_network_src}
-        ${gene_src}
-)
+
+# Generate the Makefile for the executable
+add_executable(neat ${neat_src})

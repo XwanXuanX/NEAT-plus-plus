@@ -13,5 +13,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: compilation
-      run: mkdir build && cd build && cmake .. && make
+
+    - name: Compilation
+      run: |
+          mkdir build
+          cd build
+          cmake -D CMAKE_CXX_FLAGS='-D GITHUB_ACTIONS' ..
+          make
+    
+    - name: Running NEAT++
+      run: |
+          cd build
+          ./neat
+
+    - name: Memory leak check
+      uses: Ximaz/valgrind-action@1.2.0
+      with:
+          binary_path: "$GITHUB_WORKSPACE/build/neat"
+          treat_error_as_warning: true
