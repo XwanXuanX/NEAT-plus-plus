@@ -9,7 +9,9 @@ int main(){
         GenotypeProbing::dump(g);
         g.mutate();
         GenotypeProbing::dump(g, "after-mutation");
+#ifndef GITHUB_ACTIONS
         GenotypeProbing::generate_image(g);
+#endif
 
 #if false
         // testing genotype.constructor
