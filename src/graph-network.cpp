@@ -93,11 +93,6 @@ bool GraphNet::has_cycle() const{
 
 }
 
-// count the number of connected components in the WEIGHTED graph
-uint64_t GraphNet::components() const{
-
-}
-
 // check if an edge exists
 bool GraphNet::exist(NodeID in_node, NodeID out_node) const{
         return (graph.count(in_node) && // in node must first exists and out node exists as a child of in node

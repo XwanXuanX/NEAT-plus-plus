@@ -40,9 +40,6 @@ class GraphNet{
         // check if there exists a cycle in the WEIGHTED graph
         bool has_cycle() const;
 
-        // count the number of connected components in the WEIGHTED graph
-        uint64_t components() const;
-
         // check if an edge exists
         bool exist(NodeID in_node, NodeID out_node) const;
         
